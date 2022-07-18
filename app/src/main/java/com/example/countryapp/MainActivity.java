@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,25 +29,29 @@ public class MainActivity extends AppCompatActivity {
 
         searchText = (EditText) findViewById(R.id.searchText);
         outputText = (TextView) findViewById(R.id.outputText);
+
+        loadItemDefault();
     }
 
     @SuppressLint("SetTextI18n")
     public void searchItem(View view){
 
-        String [] items = readFile();
+        String [] items = readFile().split("_");
         String country = "";
         String capital = "";
 
         boolean itemExist = false;
 
-        for (String item : items){
-            String [] setOfItem = item.split("-");
-            for (int i = 0; i < 2; i++){
-                if (searchText.getText().toString().equalsIgnoreCase(setOfItem[i])){
-                    itemExist = true;
-                    country = setOfItem[0];
-                    capital = setOfItem[1];
-                    break;
+        if (items.length > 1){
+            for (String item : items){
+                String [] setOfItem = item.split("-");
+                for (int i = 0; i < 2; i++){
+                    if (searchText.getText().toString().trim().equalsIgnoreCase(setOfItem[i])){
+                        itemExist = true;;
+                        country = setOfItem[0];
+                        capital = setOfItem[1];
+                        break;
+                    }
                 }
             }
         }
@@ -59,36 +65,48 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    String [] readFile() {
-        String [] nullArray = {""};
+    public String readFile() {
         String files[] = fileList();
         if (fileExist(files, "items.txt")) {
             try {
                 InputStreamReader file = new InputStreamReader(openFileInput("items.txt"));
                 BufferedReader br = new BufferedReader(file);
                 String line = br.readLine();
-                String items = "";
-
-                while (line != null) {
-                    items += line + "_";
-                    line = br.readLine();
-                    System.out.println(line);
-                }
-                String itemsArray[] = items.split("_");
 
                 br.close();
                 file.close();
+                return line;
 
-                return itemsArray;
+            } catch (IOException e) {
+                return "";
+            }
+        } else {
+            return "";
+        }
+    }
 
+    public void loadItemDefault() {
+        String country = "Venezuela";
+        String capital = "Caracas";
+        String country2 = "Francia";
+        String capital2 = "Paris";
+
+        String [] items = readFile().split("_");
+
+        if (items.length < 2){
+            try {
+                OutputStreamWriter file = new OutputStreamWriter(openFileOutput("items.txt", Activity.MODE_PRIVATE));
+
+
+                file.write(country + "-" + capital + "_" + country2 + "-" + capital2);
+                file.flush();
+                file.close();
             } catch (IOException e) {
 
             }
-        } else {
-            return nullArray;
         }
-        return nullArray;
     }
+
 
     public AlertDialog createSimpleDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -99,8 +117,7 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                String text = searchText.getText().toString();
-                                openAddItem(text);
+                                openAddItem(readFile());
                             }
                         })
                 .setNegativeButton("CANCELAR",
@@ -114,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    void openAddItem(String text){
+    void openAddItem(String list){
         Intent intent = new Intent(this, addItem.class);
-        intent.putExtra("item", text);
+        intent.putExtra("list", list);
         startActivity(intent);
     }
 
