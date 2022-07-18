@@ -17,13 +17,16 @@ import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText searchText = (EditText) findViewById(R.id.searchText);
-    TextView outputText = (TextView) findViewById(R.id.outputText);
+    EditText searchText;
+    TextView outputText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        searchText = (EditText) findViewById(R.id.searchText);
+        outputText = (TextView) findViewById(R.id.outputText);
     }
 
     @SuppressLint("SetTextI18n")
