@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.icu.text.SymbolTable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -31,11 +32,21 @@ public class addItem extends AppCompatActivity {
     }
 
     public void saveItem(View view) {
-        String country = countryText.getText().toString().trim();
-        String capital = capitalText.getText().toString().trim();
+        String country = lowerCase(countryText.getText().toString().trim());
+        country = upperCaseFirst(country);
+        String capital = lowerCase(capitalText.getText().toString().trim());
+        capital = upperCaseFirst(capital);
+        boolean itemExist = false;
 
-        if (!country.equals("") && !capital.equals("")) {
+        String[] items = list.split("_");
+        for (String item : items) {
+            String[] setOfItem = item.split("-");
+            if (setOfItem[0].equals(country) && setOfItem[1].equals(capital)) {
+                itemExist = true;
+            }
+        }
 
+        if (!itemExist && !country.equals("") && !capital.equals("")) {
             try {
                 OutputStreamWriter file = new OutputStreamWriter(openFileOutput("items.txt", Activity.MODE_PRIVATE));
 
@@ -65,5 +76,19 @@ public class addItem extends AppCompatActivity {
         String aux = countryText.getText().toString();
         countryText.setText(capitalText.getText().toString());
         capitalText.setText(aux);
+    }
+
+    private String lowerCase(String string) {
+        char[] array = string.toCharArray();
+        for (int i = 0; i < array.length; i++) {
+            array[i] = Character.toLowerCase(array[i]);
+        }
+        return new String(array);
+    }
+
+    private String upperCaseFirst(String string) {
+        char[] array = string.toCharArray();
+        array[0] = Character.toUpperCase(array[0]);
+        return new String(array);
     }
 }
